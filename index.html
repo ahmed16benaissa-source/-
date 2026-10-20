@@ -14,13 +14,12 @@
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #F8F6F0; /* خلفية بيج دافئة مائلة للرمادي والرمال */
+            background-color: #F8F6F0; /* خلفية بيج دافئة */
             color: #1F2937;
         }
         .font-amiri {
             font-family: 'Amiri', serif;
         }
-        /* بطاقات باللون الأبيض الكريمي الهادئ */
         .bg-cream-card {
             background-color: #FFFFFF;
             border: 1px solid #E5E0D8;
@@ -28,16 +27,6 @@
         }
         .bg-islamic-header {
             background: linear-gradient(135deg, #064E3B, #022C22);
-        }
-        .text-gold {
-            color: #D97706;
-        }
-        .bg-gold-grad {
-            background: linear-gradient(135deg, #059669, #10B981);
-            color: #FFFFFF;
-        }
-        .bg-gold-grad:hover {
-            background: linear-gradient(135deg, #047857, #059669);
         }
         .btn-reserve {
             background: linear-gradient(135deg, #D97706, #B45309);
@@ -64,61 +53,76 @@
         }
     </style>
 
-    <!-- Firebase SDK (للحجز اللحظي المباشر بين جميع الهواتف) -->
+    <!-- Firebase Realtime Sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // إعدادات قاعدة البيانات المجانية السريعة
         const firebaseConfig = {
             databaseURL: "https://quran-khatma-default-rtdb.europe-west1.firebasedatabase.app/"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        window.db = db;
-        window.dbRef = ref;
-        window.dbSet = set;
-        window.dbOnValue = onValue;
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            window.db = db;
+            window.dbRef = ref;
+            window.dbSet = set;
+            window.dbOnValue = onValue;
+        } catch(e) {
+            console.log("Firebase initialized in local mode.");
+        }
     </script>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
 
     <!-- Header / الشريط العلوي -->
-    <header class="bg-islamic-header text-white py-5 px-4 sticky top-0 z-40 shadow-xl border-b-4 border-amber-500">
-        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <header class="bg-islamic-header text-white py-4 px-4 sticky top-0 z-40 shadow-xl border-b-4 border-amber-500">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
             <div class="flex items-center space-x-3 space-x-reverse">
-                <div class="w-12 h-12 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-300 text-2xl shadow-inner">
+                <div class="w-11 h-11 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-300 text-2xl shadow-inner">
                     <i class="fa-solid fa-mosque"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-extrabold text-amber-300 tracking-wide">صدقة جارية على أمي رحمها الله</h1>
-                    <p class="text-xs text-emerald-200 mt-0.5">تقبل الله صدقتنا ودعاءنا لها بالمغفرة والرحمة والرضوان</p>
+                    <h1 class="text-lg md:text-xl font-extrabold text-amber-300 tracking-wide">صدقة جارية - ختمة القرآن الكريم</h1>
+                    <p class="text-xs text-emerald-200 mt-0.5">تقبل الله منا ومنكم صالح الأعمال والدعاء</p>
+                </div>
+            </div>
+
+            <!-- ساعة الواجهة الحية وموقع الزائر -->
+            <div class="flex items-center gap-3 bg-emerald-950/80 px-4 py-2 rounded-2xl border border-emerald-700/70 text-xs shadow-inner">
+                <div class="flex items-center gap-1.5 text-amber-300 font-bold border-l border-emerald-800 pl-3">
+                    <i class="fa-solid fa-clock text-amber-400"></i>
+                    <span id="liveClock" class="font-mono text-sm">--:--:--</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-emerald-200">
+                    <i class="fa-solid fa-location-dot text-amber-400"></i>
+                    <span id="userLocation" class="font-semibold">جاري التحديد...</span>
                 </div>
             </div>
             
-            <div id="userInfoHeader" class="hidden flex items-center gap-3 bg-emerald-900/90 px-4 py-2 rounded-xl border border-emerald-700/80 text-xs text-emerald-100 shadow">
+            <div id="userInfoHeader" class="hidden flex items-center gap-3 bg-emerald-900/90 px-3.5 py-1.5 rounded-xl border border-emerald-700/80 text-xs text-emerald-100 shadow">
                 <span><i class="fa-solid fa-user text-amber-400 ml-1"></i> <span id="displayUserName" class="font-bold"></span></span>
-                <button onclick="logout()" class="text-amber-300 hover:text-white mr-2 border-r border-emerald-700 pr-2 font-bold">خروج</button>
+                <button onclick="logout()" class="text-amber-300 hover:text-white mr-2 border-r border-emerald-700 pr-2 font-bold">تغيير الاسم</button>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
 
-        <!-- ==================== الخطوة 1: تسجيل الدخول ==================== -->
+        <!-- ==================== الخطوة 1: تسجيل الدخول (بالاسم فقط) ==================== -->
         <section id="stepLogin" class="page-step active">
-            <div class="max-w-md mx-auto my-6">
+            <div class="max-w-md mx-auto my-8">
                 <div class="bg-cream-card p-8 rounded-3xl shadow-xl relative overflow-hidden text-center border-t-8 border-t-emerald-700">
                     <div class="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto text-3xl mb-4 shadow-sm">
-                        <i class="fa-solid fa-moon"></i>
+                        <i class="fa-solid fa-kaaba"></i>
                     </div>
                     
-                    <h2 class="text-2xl font-extrabold text-emerald-900 mb-2">مرحباً بك في الختمة القرآنيّة</h2>
+                    <h2 class="text-2xl font-extrabold text-emerald-950 mb-2">مرحباً بك في الختمة القرآنيّة</h2>
                     <p class="text-xs md:text-sm text-gray-600 mb-6 leading-relaxed">
-                        هذا الموقع صدقة جارية عن روح والدتي رحمها الله. يُرجى إدخال اسمك وبريدك الإلكتروني لتتمكن من حجز وردك القرآني والمشاركة معنا.
+                        يرجى كتابة اسمك فقط للمشاركة وحجز وردك القرآني ليظهر باسمك لجميع المصلين والزوار.
                     </p>
 
                     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-right">
@@ -128,25 +132,14 @@
                                 <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-emerald-700">
                                     <i class="fa-solid fa-user"></i>
                                 </span>
-                                <input type="text" id="inputName" required placeholder="أدخل اسمك كاملاً"
-                                    class="w-full bg-gray-50 text-gray-900 pr-10 pl-3 py-3 rounded-xl border border-gray-300 focus:border-emerald-600 focus:bg-white focus:outline-none text-sm">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">البريد الإلكتروني:</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-emerald-700">
-                                    <i class="fa-solid fa-envelope"></i>
-                                </span>
-                                <input type="email" id="inputEmail" required placeholder="example@mail.com"
-                                    class="w-full bg-gray-50 text-gray-900 pr-10 pl-3 py-3 rounded-xl border border-gray-300 focus:border-emerald-600 focus:bg-white focus:outline-none text-sm">
+                                <input type="text" id="inputName" required placeholder="أدخل اسمك الكريم"
+                                    class="w-full bg-gray-50 text-gray-900 pr-10 pl-3 py-3 rounded-xl border border-gray-300 focus:border-emerald-600 focus:bg-white focus:outline-none text-sm font-semibold">
                             </div>
                         </div>
 
                         <button type="submit" 
                             class="w-full mt-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2 text-sm">
-                            <span>الدخول للمشاركة في الختمة</span>
+                            <span>دخول لاختيار الورد القرآني</span>
                             <i class="fa-solid fa-arrow-left"></i>
                         </button>
                     </form>
@@ -158,18 +151,18 @@
         <section id="stepMain" class="page-step">
             
             <!-- شريط معلومات الختمة -->
-            <div class="bg-cream-card p-6 rounded-3xl mb-8 border-r-8 border-r-amber-500 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="bg-cream-card p-6 rounded-3xl mb-6 border-r-8 border-r-amber-500 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="bg-amber-100 text-amber-900 text-xs px-3 py-1 rounded-full font-bold border border-amber-300">
                             الختمة الحالية رقم <span id="khatmaNumber">1</span>
                         </span>
                         <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span> حجز مباشر ومباشر
+                            <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span> حجز مباشر محدوث
                         </span>
                     </div>
-                    <h2 class="text-2xl font-bold text-emerald-950 mt-2">جدول أجزاء القرآن الكريم (30 جزءاً)</h2>
-                    <p class="text-xs text-gray-600 mt-1">احجز وردك الآن وسيظهر للجميع فوراً بأنه محجوز باسمك. عند اكتمال 30 جزءاً تُفتح ختمة جديدة تلقائياً.</p>
+                    <h2 class="text-xl md:text-2xl font-bold text-emerald-950 mt-2">جدول أجزاء القرآن الكريم (30 جزءاً)</h2>
+                    <p class="text-xs text-gray-600 mt-1">اختر وردك واحجزه، وسيتحدث فوراً لدى الجميع لمنع تكرار الحجز.</p>
                 </div>
                 
                 <div class="flex items-center gap-6 bg-stone-100 p-3 px-6 rounded-2xl border border-stone-200">
@@ -182,6 +175,25 @@
                         <div class="text-2xl font-black text-emerald-700" id="remainingCount">30</div>
                         <div class="text-xs font-bold text-gray-600">المتاحة</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- أزرار مشاركة الموقع للنشر -->
+            <div class="bg-emerald-900 text-white p-3.5 rounded-2xl mb-6 flex flex-wrap items-center justify-between gap-3 shadow">
+                <div class="text-xs font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-amber-400 text-sm"></i>
+                    <span>انشر الموقع وشارك في الأجر والثواب:</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="shareWhatsapp" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> واتساب
+                    </a>
+                    <a id="shareTelegram" target="_blank" class="bg-sky-600 hover:bg-sky-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition">
+                        <i class="fa-brands fa-telegram text-sm"></i> تليجرام
+                    </a>
+                    <a id="shareFacebook" target="_blank" class="bg-blue-700 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition">
+                        <i class="fa-brands fa-facebook text-sm"></i> فيسبوك
+                    </a>
                 </div>
             </div>
 
@@ -198,38 +210,76 @@
                 </button>
             </div>
 
-            <!-- شبكة الأجزاء -->
+            <!-- شبكة الأجزاء الـ 30 -->
             <div id="juzTab" class="tab-content">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="juzGrid">
-                    <!-- يتم التحميل ديناميكياً -->
+                    <!-- يتم التحميل فوراً بالـ JavaScript -->
                 </div>
             </div>
 
-            <!-- الأدعية -->
+            <!-- قسم الأدعية والأذكار المتنوعة -->
             <div id="duaaTab" class="tab-content hidden space-y-6">
-                <div class="bg-cream-card p-6 rounded-2xl border-r-4 border-r-amber-500">
-                    <h3 class="text-xl font-bold text-emerald-900 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-heart text-amber-500"></i> دعاء لوالدتي رحمها الله
+                
+                <!-- أدعية طلب العلم والتوفيق -->
+                <div class="bg-cream-card p-6 rounded-2xl border-r-4 border-r-sky-600">
+                    <h3 class="text-xl font-bold text-sky-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap text-sky-600"></i> أدعية طلب العلم والتوفيق
                     </h3>
-                    <p class="font-amiri text-lg md:text-xl text-stone-800 leading-loose bg-stone-50 p-4 rounded-xl border border-stone-200">
+                    <div class="space-y-3 font-amiri text-lg text-stone-800 leading-relaxed">
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"رَّبِّ زِدْنِي عِلْمًا."</p>
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"اللهم انفعني بما علمتني، وعلمني ما ينفعني، وزدني علماً، والحمد لله على كل حال."</p>
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً."</p>
+                    </div>
+                </div>
+
+                <!-- أدعية طلب الرزق والبركة -->
+                <div class="bg-cream-card p-6 rounded-2xl border-r-4 border-r-emerald-600">
+                    <h3 class="text-xl font-bold text-emerald-950 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-coins text-emerald-600"></i> أدعية طلب الرزق والبركة
+                    </h3>
+                    <div class="space-y-3 font-amiri text-lg text-stone-800 leading-relaxed">
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"اللهم اكفني بحلالك عن حرامك، وأغنني بفضلك عمن سواك."</p>
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"اللهم يسّر لي رزقاً حلالاً عاجلاً غير آجل، وبارك لي فيما رزقتني يا أرحم الراحمين."</p>
+                    </div>
+                </div>
+
+                <!-- أدعية التوكل على الله وتيسير الأمور -->
+                <div class="bg-cream-card p-6 rounded-2xl border-r-4 border-r-indigo-600">
+                    <h3 class="text-xl font-bold text-indigo-950 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-holding-heart text-indigo-600"></i> أدعية التوكل على الله والتيسير
+                    </h3>
+                    <div class="space-y-3 font-amiri text-lg text-stone-800 leading-relaxed">
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ ۖ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ."</p>
+                        <p class="bg-stone-50 p-3.5 rounded-xl border border-stone-200">"اللهم لا سهل إلا ما جعلته سهلاً، وأنت تجعل الحزن إذا شئت سهلاً."</p>
+                    </div>
+                </div>
+
+                <!-- دعاء ختم القرآن الكريم -->
+                <div class="bg-cream-card p-6 rounded-2xl border-r-4 border-r-emerald-800">
+                    <h3 class="text-xl font-bold text-emerald-950 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-book-open text-emerald-700"></i> من أدعية ختم القرآن الكريم
+                    </h3>
+                    <p class="font-amiri text-lg text-stone-800 leading-relaxed bg-stone-50 p-4 rounded-xl border border-stone-200">
+                        "اللهم ارحمني بالقرآن واجعله لي إماماً ونوراً وهدى ورحمة. اللهم ذكرني منه ما نسيت وعلمني منه ما جهلت وارزقني تلاوته آناء الليل وأطراف النهار واجعله لي حجة يا رب العالمين."
+                    </p>
+                </div>
+
+                <!-- دعاء خاص لوالدتي رحمها الله (في أواخر الأدعية) -->
+                <div class="bg-amber-50/70 p-6 rounded-2xl border-2 border-amber-400 shadow-sm">
+                    <h3 class="text-xl font-bold text-amber-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-heart text-amber-600"></i> دعاء خاص لوالدتي رحمها الله (صدقة جارية)
+                    </h3>
+                    <p class="font-amiri text-lg text-stone-800 leading-loose bg-white p-4 rounded-xl border border-amber-200">
                         "اللهم اغفر لها وارحمها، وعافها واعف عنها، وأكرم نزولها، ووسع مدخلها، واغسلها بالماء والثلج والبرد، ونقها من الخطايا كما ينقى الثوب الأبيض من الدنس. اللهم أبدلها داراً خيراً من دارها، وأهلاً خيراً من أهلها، وأدخلها الجنة، وأعذها من عذاب القبر ومن عذاب النار."
                     </p>
                 </div>
 
-                <div class="bg-cream-card p-6 rounded-2xl border-r-4 border-r-emerald-700">
-                    <h3 class="text-xl font-bold text-emerald-900 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-book-open text-emerald-700"></i> من أدعية ختم القرآن الكريم
-                    </h3>
-                    <p class="font-amiri text-lg md:text-xl text-stone-800 leading-loose bg-stone-50 p-4 rounded-xl border border-stone-200">
-                        "اللهم ارحمني بالقرآن واجعله لي إماماً ونوراً وهدى ورحمة. اللهم ذكرني منه ما نسيت وعلمني منه ما جهلت وارزقني تلاوته آناء الليل وأطراف النهار واجعله لي حجة يا رب العالمين."
-                    </p>
-                </div>
             </div>
 
-            <!-- المسبحة -->
+            <!-- المسبحة الإلكترونية -->
             <div id="tasbeehTab" class="tab-content hidden">
                 <div class="max-w-md mx-auto bg-cream-card p-8 rounded-3xl text-center shadow-lg border border-stone-200">
-                    <h3 class="text-xl font-bold text-emerald-900 mb-1">المسبحة الإلكترونية</h3>
+                    <h3 class="text-xl font-bold text-emerald-950 mb-1">المسبحة الإلكترونية</h3>
                     <p class="text-xs text-gray-500 mb-6">سبّح واذكر الله واجعل الأجر صدقة جارية</p>
 
                     <div class="bg-stone-100 py-8 px-4 rounded-2xl border border-stone-200 mb-6">
@@ -253,7 +303,7 @@
         </section>
     </main>
 
-    <!-- ==================== نافذة الشكر والدعاء الشخصي ==================== -->
+    <!-- نافذة الشكر للدعاء الشخصي -->
     <div id="thanksModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white max-w-md w-full p-6 rounded-3xl border-t-8 border-t-amber-500 shadow-2xl text-center relative">
             <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto text-amber-600 text-3xl mb-4">
@@ -274,7 +324,7 @@
     <footer class="bg-emerald-950 text-white py-6 px-4 text-center text-xs border-t-4 border-amber-500">
         <div class="max-w-6xl mx-auto space-y-2">
             <p class="font-bold text-amber-300 text-sm">اللهم اجعل هذا العمل خالصاً لوجهك الكريم وصدقة جارية لوالدتي رحمها الله.</p>
-            <p class="text-emerald-200">شارك الرابط مع أقاربك وأصدقائك ليتشارك الجميع في الأجر.</p>
+            <p class="text-emerald-200">شارك الرابط مع أقاربك وأصدقائك ليتشارك الجميع في الأجر والمغفرة.</p>
         </div>
     </footer>
 
@@ -286,20 +336,22 @@
             "الجزء السابع (المائدة 82 - الأنعام 110)", "الجزء الثامن (الأنعام 111 - الأعراف 87)", "الجزء التاسع (الأعراف 88 - الأنفال 40)",
             "الجزء العاشر (الأنفال 41 - التوبة 92)", "الجزء الحادي عشر (التوبة 93 - هود 5)", "الجزء الثاني عشر (هود 6 - يوسف 52)",
             "الجزء الثالث عشر (يوسف 53 - إبراهيم 52)", "الجزء الرابع عشر (الحجر 1 - النحل 128)", "الجزء الخامس عشر (الإسراء 1 - الكهف 74)",
-            "الجزء السادس عشر (الكهف 75 - طه 135)", "الجزء السابع عشر (الأنبيائ 1 - الحج 78)", "الجزء الثامن عشر (المؤمنون 1 - الفرقان 20)",
+            "الجزء السادس عشر (الكهف 75 - طه 135)", "الجزء السابع عشر (الأنبياء 1 - الحج 78)", "الجزء الثامن عشر (المؤمنون 1 - الفرقان 20)",
             "الجزء التاسع عشر (الفرقان 21 - النمل 55)", "الجزء العشرون (النمل 56 - العنكبوت 45)", "الجزء الحادي والعشرون (العنكبوت 46 - الأحزاب 30)",
             "الجزء الثاني والعشرون (الأحزاب 31 - يس 27)", "الجزء الثالث والعشرون (يس 28 - الزمر 31)", "الجزء الرابع والعشرون (الزمر 32 - الفصلت 46)",
             "الجزء الخامس والعشرون (فصلت 47 - الجاثية 37)", "الجزء السادس والعشرون (الأحقاف 1 - الذاريات 30)", "الجزء السابع والعشرون (الذاريات 31 - الحديد 29)",
             "الجزء الثامن والعشرون (المجادلة 1 - التحريم 12)", "الجزء التاسع والعشرون (الملك 1 - المرسلات 50)", "الجزء الثلاثون (النبأ 1 - الناس 6)"
         ];
 
-        let currentUser = JSON.parse(localStorage.getItem('quran_user')) || null;
-        let reservedJuz = {};
-        let khatmaRound = 1;
+        let currentUser = JSON.parse(localStorage.getItem('quran_user_name')) || null;
+        let reservedJuz = JSON.parse(localStorage.getItem('quran_local_reserved')) || {};
+        let khatmaRound = parseInt(localStorage.getItem('quran_khatma_round')) || 1;
         let tasbeehCount = parseInt(localStorage.getItem('quran_tasbeeh_count')) || 0;
 
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('counterValue').innerText = tasbeehCount;
+            setupClockAndLocation();
+            setupShareLinks();
 
             if (currentUser) {
                 showStep('stepMain');
@@ -308,9 +360,41 @@
                 showStep('stepLogin');
             }
 
-            // الربط وقراءة الحجوزات المباشرة مع السيرفر السحابي
-            setTimeout(initRealtimeSync, 1000);
+            // عرض الأجزاء مباشرة فور التحميل
+            renderJuzGrid();
+
+            // المزامنة مع السيرفر السحابي
+            setTimeout(initRealtimeSync, 800);
         });
+
+        // تشغيل الساعة التفاعلية وموقع الزائر
+        function setupClockAndLocation() {
+            // الساعة
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('liveClock').innerText = now.toLocaleTimeString('ar-EG');
+            }, 1000);
+
+            // موقع الزائر الجغرافي التلقائي
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    () => { document.getElementById('userLocation').innerText = "الجزائر (الآن)"; },
+                    () => { document.getElementById('userLocation').innerText = "الجزائر / موقعك الحالي"; }
+                );
+            } else {
+                document.getElementById('userLocation').innerText = "موقعك الحالي";
+            }
+        }
+
+        // إعداد روابط المشاركة السريعة
+        function setupShareLinks() {
+            const pageUrl = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent("صدقة جارية - شارك معنا في الختمة القرآنيّة واحجز وردك الآن:");
+            
+            document.getElementById('shareWhatsapp').href = `https://api.whatsapp.com/send?text=${text}%20${pageUrl}`;
+            document.getElementById('shareTelegram').href = `https://t.me/share/url?url=${pageUrl}&text=${text}`;
+            document.getElementById('shareFacebook').href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
+        }
 
         function initRealtimeSync() {
             if (!window.db) return;
@@ -318,15 +402,14 @@
             
             window.dbOnValue(khatmaRef, (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    reservedJuz = data.reservedJuz || {};
+                if (data && data.reservedJuz) {
+                    reservedJuz = data.reservedJuz;
                     khatmaRound = data.khatmaRound || 1;
-                } else {
-                    reservedJuz = {};
-                    khatmaRound = 1;
+                    localStorage.setItem('quran_local_reserved', JSON.stringify(reservedJuz));
+                    localStorage.setItem('quran_khatma_round', khatmaRound);
+                    document.getElementById('khatmaNumber').innerText = khatmaRound;
+                    renderJuzGrid();
                 }
-                document.getElementById('khatmaNumber').innerText = khatmaRound;
-                renderJuzGrid();
             });
         }
 
@@ -351,25 +434,24 @@
         function handleLogin(e) {
             e.preventDefault();
             const name = document.getElementById('inputName').value.trim();
-            const email = document.getElementById('inputEmail').value.trim();
 
-            if (name && email) {
-                currentUser = { name, email };
-                localStorage.setItem('quran_user', JSON.stringify(currentUser));
+            if (name) {
+                currentUser = name;
+                localStorage.setItem('quran_user_name', JSON.stringify(currentUser));
                 updateUserInfoDisplay();
                 showStep('stepMain');
             }
         }
 
         function logout() {
-            localStorage.removeItem('quran_user');
+            localStorage.removeItem('quran_user_name');
             currentUser = null;
             showStep('stepLogin');
         }
 
         function updateUserInfoDisplay() {
             if (currentUser) {
-                document.getElementById('displayUserName').innerText = currentUser.name;
+                document.getElementById('displayUserName').innerText = currentUser;
                 document.getElementById('userInfoHeader').classList.remove('hidden');
             }
         }
@@ -386,7 +468,7 @@
 
                 const card = document.createElement('div');
                 card.className = `bg-cream-card p-4 rounded-2xl transition-all flex flex-col justify-between ${
-                    isReserved ? 'border-2 border-amber-400 bg-amber-50/30' : 'hover:border-emerald-600 hover:shadow-md'
+                    isReserved ? 'border-2 border-amber-400 bg-amber-50/40' : 'hover:border-emerald-600 hover:shadow-md'
                 }`;
 
                 card.innerHTML = `
@@ -430,18 +512,20 @@
             document.getElementById('reservedCount').innerText = reservedTotal;
             document.getElementById('remainingCount').innerText = 30 - reservedTotal;
 
-            // فتح ختمة جديدة عند اكتمال الـ 30 جزءاً
             if (reservedTotal === 30) {
                 setTimeout(() => {
                     alert(`الحمد لله! اكتملت الختمة القرآنيّة رقم (${khatmaRound}). تم الآن فتح ختمة جديدة رقم (${khatmaRound + 1}) تلقائياً.`);
                     khatmaRound += 1;
                     reservedJuz = {};
+                    localStorage.setItem('quran_local_reserved', JSON.stringify({}));
+                    localStorage.setItem('quran_khatma_round', khatmaRound);
                     if(window.db) {
                         window.dbSet(window.dbRef(window.db, 'khatmaData'), {
                             khatmaRound: khatmaRound,
                             reservedJuz: {}
                         });
                     }
+                    renderJuzGrid();
                 }, 800);
             }
         }
@@ -453,12 +537,12 @@
             }
 
             reservedJuz[juzIndex] = {
-                userName: currentUser.name,
-                userEmail: currentUser.email,
+                userName: currentUser,
                 date: new Date().toLocaleDateString('ar-EG')
             };
 
-            // حفظ التغييرات مباشرة للسيرفر السحابي
+            localStorage.setItem('quran_local_reserved', JSON.stringify(reservedJuz));
+
             if (window.db) {
                 window.dbSet(window.dbRef(window.db, 'khatmaData'), {
                     khatmaRound: khatmaRound,
@@ -466,9 +550,10 @@
                 });
             }
 
-            // رسالة الشكر والدعاء الشخصي
+            renderJuzGrid();
+
             const thanksMsg = `
-                أهلاً بك يا <span class="text-emerald-800 font-bold">${currentUser.name}</span>.<br>
+                أهلاً بك يا <span class="text-emerald-800 font-bold">${currentUser}</span>.<br>
                 تقبل الله منك قراءة <span class="text-amber-800 font-bold">${juzNames[juzIndex - 1]}</span>.<br><br>
                 <span class="text-emerald-900 font-bold">"تقبل الله منك وجزاك الله خيراً، وزادك الله فضلاً وأجراً، ونوّر قلبك بالقرآن العظيم وجعله لك شفيعاً يوم القيامة."</span>
             `;
